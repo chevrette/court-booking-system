@@ -41,8 +41,10 @@ class Court {
   }
 
   isAvailable(from, to) {
-    // TODO
-    return this.reservations.filter(_ => false) == 0;
+    const overlapped = this.reservations.filter(
+      r => !((from >= r.to && to > r.to) || (from < r.from && to <= r.from))
+    );
+    return overlapped.length == 0;
   }
 }
 
