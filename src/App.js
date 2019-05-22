@@ -32,10 +32,13 @@ const styles = {
   backDrop: {
     backgroundColor: "transparent"
   },
-  paper: {
+  dialogPaper: {
     backgroundColor: "#f5f5f5",
     boxShadow: "none",
     overflow: "hidden"
+  },
+  tablePaper: {
+    marginBottom: "20px"
   }
 };
 
@@ -231,7 +234,7 @@ class ReservationDialog extends React.Component {
         }}
         PaperProps={{
           classes: {
-            root: this.props.classes.paper
+            root: this.props.classes.dialogPaper
           }
         }}
       >
@@ -283,20 +286,84 @@ class ReservationDialog extends React.Component {
 }
 
 class Statistics extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      reservations: this.props.reservations
-    };
-    // const numOfCourts = 6;
+  courtsReservation() {
+    this.props.reservations.map(court => {
+      if (court.reservations.lengt === 0) {
+        court.reservedPercentage = Number(0).toFixed(2);
+      } else {
+        court.reservedPercentage = Number(
+          (court.reservations.length * 100) / 16
+        ).toFixed(2);
+      }
+    });
   }
 
-  courtsAvailability() {}
+  getAllReservations() {
+    let reservationsList = [];
+    this.props.reservations.map(court => {
+      court.reservations.map(res => (res.courtNum = court.id));
+      reservationsList.push(...court.reservations.flat());
+    });
+    return reservationsList;
+  }
 
   render() {
+    this.courtsReservation();
     return (
       <Grid container direction="column">
         <h1>Statistics</h1>
+        <Paper
+          classes={{
+            root: this.props.classes.tablePaper
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Court number</TableCell>
+                <TableCell align="right">Reserved(%)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.props.reservations.map(r => (
+                <TableRow key={`${r.id}`}>
+                  <TableCell component="th" scope="row">
+                    {r.id}
+                  </TableCell>
+                  <TableCell align="right">{r.reservedPercentage}%</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
+        <Paper
+          classes={{
+            root: this.props.classes.tablePaper
+          }}
+        >
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell align="right">Court</TableCell>
+                <TableCell align="right">Hours</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {this.getAllReservations().map(r => (
+                <TableRow key={`${r.courtNum}${r.from}`}>
+                  <TableCell component="th" scope="row">
+                    {r.owner}
+                  </TableCell>
+                  <TableCell align="right">{r.courtNum}</TableCell>
+                  <TableCell align="right">
+                    {r.from}-{r.to}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
       </Grid>
     );
   }
@@ -307,10 +374,3 @@ App.propTypes = {
 };
 
 export default withStyles(styles)(App);
-
-// klik -> jesli wolny to popup z danymi rezerwacji i
-// inputem na imie -> zrobienie puta do routera ->
-// zmiana koloru kortu
-
-// zmiana koloru: makeRes powinno zwrócic true/false i na podstawie
-// tego button ustawia kolor
